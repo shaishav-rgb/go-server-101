@@ -7,6 +7,11 @@ import (
 	"os"
 )
 
+type application struct{
+	errorLog *log.Logger
+	infoLog *log.Logger
+}
+
 
 func main(){
 
@@ -17,19 +22,15 @@ func main(){
 	
 	errorLog:=log.New(os.Stderr,"ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
-	mux:=http.NewServeMux()
+	app:=&application{
+		errorLog: errorLog,
+		infoLog: infoLog,
+	}
 
-	fileServer:=http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/",http.StripPrefix("/static",fileServer))
-
-
-	mux.HandleFunc("/",home)
-	mux.HandleFunc("/snippet/view",snippetView)
-	mux.HandleFunc("/snippet/create",snippetCreate)
 
 	srv:=http.Server{
 		Addr: *addr,
-		Handler: mux,
+		Handler: app.routes(),
 		ErrorLog: errorLog,
 	}
 
